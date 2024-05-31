@@ -1,0 +1,172 @@
+#***Tổng kết các lệnh git thường dùng
+
+
+Chỉ ghi những thứ cần nhiều bước, kp là vai trò từng lệnh:
++) Tạo 1 dự án mới toanh liên kết với git trên remote: git init -> git remote add origin <url remote>
++) Sửa config file khắc phục lỗi config: git config --global/system --edit -> kéo xuống -> Insert -> xóa config gây lỗi -> Esc -> :wq!
++) Commit lên local r push lên remote: git status -s -> git add . -> git commit -m "message" -> git push -u origin <tên nhánh> (next)-> git pull -> Chọn sửa -> git add . -> git commit -m "message" -> git push
++) Trở về 1 commit cũ trên 1 nhánh mới: git checkout <hash nhánh cũ> -> git checkout -b <tên nhánh>
++) Để merge nhánh A với nhánh B: git checkout <nhánh A> -> git merge <nhánh B> -m "có thể bỏ" (next)-> resolve conflict -> git add . -> git commit -m "messge"
++) Để rebase nhánh A có base là nhánh B: git checkout <nhánh A> -> git rebase <nhánh B> (next)-> resolve conflict -> git add .(để lưu lại thay đổi resolve conflict) -> git rebase --continue -> Insert -> sửa thông tin các commit -> Esc -> :wq!
+=> ref tới "# Công ty C# / Git"
++) Để sửa, gộp N commit cũ mới nhất và ép remote và mọi người đồng bộ với nó: git rebase -i HEAD~N -> i -> sửa các commit (p là giữ commit, s là vẫn dùng commit này nhưng đè vào commit trước đó, r là giữ commit này nhưng viết lại message, từ trên xuống là commit từ cũ đến mới, xóa dòng commit nào để xóa commit đó) -> Esc -> :wq! -> resolve conflict(nếu có) -> git add . -> git rebase --continue -> i -> sửa message nếu cần -> Esc -> :wq! -> git push origin +<tên nhánh> để push lên remote -> những người khác vào đồng bộ sẽ bị conflict thì phải dùng git pull --rebase
++) Clone 1 dự án mẫu về và dùng nó thành 1 dự án mới của ta: git clone-> remote remove origin-> lên github tạo 1 repos mới -> remote add origin mới của ta
++) Ta đang làm ở nhanh A, 1 người làm nhánh B, có 1 nhánh C là nhánh develop cuối cùng cần nạp vào => người làm nhánh B xong báo cho ta. Ta có thể merge nó với nhánh C or merge với nhánh A xong lại merge A với C đều được. Giả sử chơi cách 2 và ta đang ở local k có nhánh B của người đó: git branch -a và lấy branch remotes của B -> git checkout remotes/.. chuyển sang nhánh B -> git checkout -b D -> là có nhánh D giống nhánh B nhưng ở local -> chỉnh sửa lại nhánh D và commit nhánh D -> git checkout B -> git merge D -> solve conflict nếu có -> git add -> commit -> push B lên
+
+
+Lệnh quan trọng tiện dụng cần nhớ và phân biệt lệnh:
+git add -u => staged các file đã được add từ trước, bỏ qua các file untracked
+git commit --amend -m "message" => sửa commit cuối cùng thành commit hiện tại
+git log --oneline --graph => hiển thị dễ nhìn và rõ cả gộp nhánh, pull
+git branch -a => xem mọi nhánh cả remote cả local
+git checkout <hash> <link file/-- .> => phục hồi lại file ở commit nào, phục hồi xong nó tự động đã được git add rồi
+git checkout <link file> => phục hồi lại file nào ở commit cuối cùng
+git branch -m "old_branch" "new_branch" => đổi tên branch
+git branch -v => liệt kê mọi nhánh và commit cuối
+git branch --merged/--no-merged => liệt kê các nhánh được/k được merge với nhánh hiện tại
+git submodule add <url> <tên submodule> => thêm 1 repos khác vào repos này. Or ta git clone xong xóa thư mục .git đi
+git reset --hard <hash> => quay lại đến commit nào
+git rm -r --cached => sau khi dùng gitignore 
+
+git remote set-url origin <git url> => thay vì xóa r add lại, ta có thể set add lại luôn
+
+git clone --single-branch --branch <branchname> <remote-repo> => chỉ clone 1 branch từ remote, cái này dùng khi 1 người mới vào -> mới vào thì pull 1 nhanh về thôi chứ sao lại copy
+git checkout -b <tên nhánh mới ở local> origin/<tên nhánh remote> => tạo 1 nhánh mới ở local giống 1 nhánh ở remote
+git pull origin <tên branch remote> => pull 1 nhánh từ remote về nhánh hiện tại ở local
+
+git branch -d <tên branch> => xóa nhánh ở local
+git push origin --delete <tên branch> => xóa nhánh ở remote
+git push -u origin <branch> => push 1 nhánh nào lên remote
+
+git reset --soft HEAD~1 => hủy commit cuối và mọi thay đổi ở commit cuối chuyển vào vùng staging
+git reset --hard HEAD~1 => hủy commit cuối và undo mọi thay đổi ở các file, nếu chưa push lên remote thì lệnh này làm mất dữ liệu file
+git reset --hard => undo các lệnh git add mới nhất và mất dữ liệu file, quay về y như commit cuối cùng
+git reset => undo các lệnh git add và file đã sửa đổi thành modified chưa được add
+
+git diff => khác biệt của working tree với commit cuối
+git diff --staged => khác biệt của vùng staged với commit cuối
+git diff hash1 hash2 => khác biệt 2 commit
+git diff branch1 branch2 => khác biệt 2 branch
+
+git rebase --abort => abort rebase và checkout về nhánh original
+git rebase --quit => abort rebase và giữ HEAD ở đúng vị trí hiện tại
+
+Luồng làm việc: Head đang ở nhánh master là dự án chính -> ta muốn các bạn vào làm các dự án con thì bảo các bạn checkout ra nhánh alpha từ nhánh master và các bạn làm việc ở nhánh alpha
+TH1: Sau đó nhánh master phát sinh lỗi và ta fix lỗi ở nhánh đó bằng 1 nhánh mới sualoigap -> sau khi fix lỗi thấy ổn thì ta merge bằng cách checkout master và merge với sualoigap-> HEAD ở nhánh master đuổi kịp mọi thứ của sualoigap -> xóa nhanh sualoigap đi
+TH2: Sau khi các bạn làm việc xong nhánh alpha -> git checkout master và merge với alpha -> master có mọi thứ của alpha và đang là mới nhất (vì lần gộp này có xung đột so với alpha) -> có thể delete alpha rồi
+TH3: Đang làm việc tại nhánh master ở local tự dưng thấy 1 commit trước đó cần sửa đổi -> checkout nó và làm việc với nó trên beta -> sau khi sửa xong thì muốn master cũng có thì ta cho nó làm base bằng cách -> HEAD đang ở beta thì ta checkout beta và rebase với master -> master giờ là base của beta và HEAD đang ở beta -> lại phải checkout master merge với beta để master đuổi kịp beta(như TH1) -> xóa beta được
+
+
+-> Các lỗi
+Lỗi file name too long => fix: git config core.longpaths true
+
+Lỗi: unable to access The requested URL returned error: 400 k cho push => ta dùng: git remote rm origin -> add lại remote origin
+
+Fix lỗi đăng nhập password k được mà phải dùng personmal access token:
+https://stackoverflow.com/questions/68775869/support-for-password-authentication-was-removed-please-use-a-personal-access-to
+=> khi push mà yêu cầu nhập thì username là token, password bỏ trống
+
+Lỗi server hang up unexpected: 
+Lỗi này gây ra khi ta push lên git 1 lượng file lớn chỉ trong 1 lần nhưng băng thông mạng kém. Lỗi này nhiều lúc cũng xảy ra theo nhiều hướng dù chỉ đổi có 1 tí nhưng cũng k commit lên được. Có nhiều lệnh giúp fix:
+git config --global http.version HTTP/1.1 => lỗi này rất có thể do HTTP/2 đang dùng k phù hợp, chuyển về phiên bản cũ HTTP/1.1 rồi push thử r chuyển lại HTTP/2 sau
+git config http.postBuffer 524289000 => tăng lượng buffer để 1 lần có thể push nhiều hơn
+=> Cách tốt nhất vẫn phải là push từng phần và tìm chỗ mạng mạnh hơn. Mạng yếu thì bó tay.
+
+Lỗi SSL cerfiticate:
+K nên tắt verifySSL vì có thể bị tấn công bằng man in the middle. Ở phiên bản git hiện tại của window, có thể config cho git sử dụng schannel thay vì curl CA như trước. 
+Set với: git config --global http.sslbackend schannel
+
+
+
+-> Đồng bộ nhánh local và remote
+- Khi ta dùng git branch -a rồi pull nhanh đó về thao tác thì tên nhánh đó vẫn ở remote, ta đang k thao tác ở local và rất nguy hiểm, data có thể mất, do đó phải checkout -b tiếp về tên nhánh ở local đã. Nhiều lúc nó sida khi nhánh remote k tìm thấy ở local và buộc phải làm v
+Tức là: git branch -a => checkout nhánh remotes => checkout -b nhánh mới cùng tên ở local(điều này là qtr, tránh mất dữ liệu) => sửa và thao tác bth ở nhánh local
+
+- Đang làm việc ở branch A, người khác push lên 1 branch mới toanh là B, ta cần merge branch B vào A
+Nếu git branch -a sẽ k thấy nhánh B vì nó mới push lên, phải chạy git fetch sẽ thấy nhánh B. Ta checkout nhánh B sẽ đang ở nhánh tạm có nội dung giống nhánh B ở local. Đặc điểm của nhánh tạm này là đổi nhánh sẽ mất và k thể quay lại -> ta phải checkout -b B tiếp từ nhánh tạm để có nhánh B thực sự ở local. 
+Đang ở branch A, git merge branch B sẽ merge branch B vào A
+
+
+-> HEAD trong git
+HEAD chỉ định 1 commit của 1 nhánh hiện tại mà ta đang làm việc. Nó được lưu trong file .git/HEAD => đôi khi nó k chứa tham chiếu branch cụ thể mà là giá trị SHA-1 của 1 version cụ thể, đó là khi detached HEAD xảy ra 
+
+Trạng thái Detached HEAD là 1 trạng thái mà HEAD k ở commit mới nhất, khi đó để tránh mất data trong nhánh đang làm việc, nó checkout ra riêng 1 nhánh Detached HEAD. 
+VD: git checkout -b test-branch 56a4e5c08 => ta quay lại commit 56a4e5c08 ở 1 nhánh mới là test-branch. Nếu k tạo như v thì commit 56a4e5c08 sẽ ở trạng thái detached HEAD
+=> Khi làm việc, ta nên làm ở 1 nhánh cụ thể, tránh ở nhánh detached head dễ bị loạn code. 
+
+
+-> Cách save code vào stash và apply bất cứ lúc nào:
+Nên thực hiện bằng giao diện trên VSC là tốt nhất. Dùng extension gitlens:
+Chọn 1 list các file cần save => chuột phải stash changes, đặt tên bừa 
+Để lấy lại => click vào stash có nút apply tất cả vào nhánh hiện tại, có conflict thì resolve là xong
+
+
+
+#***Biện pháp cuối cùng với cheery pick và reflog:
+
+-> Dùng git cherry-pick
+Vấn đề 1: ta muốn 1 lần commit áp dụng vào cả 2 branch A và B
+Vấn đề 2: ta muốn lấy n commit bất kỳ từ branch A và áp dụng cho branch B. Tức mọi phần code thay đổi ở n commit trên branch A sẽ áp dụng cho B
+
+Lệnh git merge 2 branch bằng cách kết hợp các commit lại và sinh ra commit merge ở cuối. Còn git rebase nhánh B khi đang ở nhánh A sẽ thay đổi base nhánh A thành nhánh B và thêm các commit của A vào cuối. Cả 2 cái đều k giải quyết được mà phải dùng git cherry-pick
+
+--> Bốc 1 commit bất kỳ từ nhánh A sang nhánh B:
+git cherry-pick [--edit] [-n] [-m parent-number] [-s] [-x] [--ff]
+		  [-S[<keyid>]] <commit>…
+git cherry-pick --continue
+git cherry-pick --quit
+git cherry-pick --abort
+
+VD1 lấy commit từ 1 branch bỏ vào master:
+git checkout master
+git cherry-pick <nhánh>~1
+
+Hoặc chỉ định hash commit: git cherry-pick <hash commit> => vì hash commit luôn là duy nhất nên k cần xđ branch nào
+
+VD2 lấy n commits từ 1 brach bỏ vào master
+# Nếu muốn thêm 1 vài commit, không liên tục
+git cherry-pick commit_id1 commit_id3
+
+# Nếu muốn thêm 1 loạt commit lần lượt cạnh nhau
+git cherry-pick commit_id1...commit_id5
+
+# Với code trên, thì commit_id1 sẽ ko được thêm vào. Để đưa commit được tính vào trong branch muốn thêm thì:
+git cherry-pick commit_id1^..commit_id5
+
+VD3 apply 1 commit A cho cả 2 branch-X và branch-Y
+# Đang ở branch-X, thực hiện commit để tạo ra commit A
+git add -A
+git commit -m " finish commit A"
+
+# Checkout sang branch Y và dùng cherry-pick
+git checkout branch-Y
+git cherry-pick branch-X => tự dùng commit trên cùng
+
+=> Cherry pick cũng có conflict, phải resolve, add r commit lại
+
+-> Dùng git reflog => biện pháp cuối cùng
+Lệnh git reflog sẽ lưu lại lịch sử thao tác trên git như commit, xóa branch, reset. Ta có thể undo các hành động, or thực hiện lại các hành động thoải mái
+
+git reflog => xem lịch sử thao tác git trên mọi nhánh
+git reflog a => xem lịch sử thao tác git chỉ trên nhánh a
+
+- Khôi phục branch x đã bị xóa mà chưa push:
+git reflog => hiển thị lịch sử thao tác git, ta tìm vị trí HEAD@{n} là thao tác mới nhất ở nhánh x muốn được khôi phục về. 
+git checkout -b x 'HEAD@{n}' => tạo lại nhánh x có trạng thái y như HEAD@{n}, ta có thể đặt tên nhánh là gì cx được.
+
+- Khôi phục code khi lỡ dùng git reset --hard:
+1) Nó không khôi phục được khi ta chưa commit code
+
+2) Đã commit code nhưng chưa push, chưa commit thêm gì, lỡ gọi git reset --hard HEAD~1 (xóa commit mới nhất) thay vì git reset --soft HEAD~1 (để sửa commit mới nhất), cần khôi phục commit đã xóa
+git reflog => thấy những thao tác cũ
+Ta tìm hành động cuối cùng trước khi xóa, thg ở đây là HEAD@{1} thì dùng: git reset --hard HEAD@{1} là xong
+
+3) Xóa commit cũ, thêm commit mới, lại muốn khôi phục commit cũ kia:
+git reflog => tìm id của hành động mà dùng để thêm commit cũ vào, 
+git cherry-pick <id hành động> => để thêm lại hành động đó vào nhánh mới nhất
+
+- Tương tự có thể tùy biến. VD ta muốn rebase từ develop vào feature nhưng lại rebase nhầm master vào feature. 
+Ta cần hoàn tác thì lại git reflog để tìm id của hành động gần nhất trước khi rebase -> git reset --hard HEAD@{n} với HEAD@{n} là hành động tìm được
+
+
+
