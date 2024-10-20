@@ -1,0 +1,98 @@
+# Cheery pick
+Vấn đề 1: ta muốn 1 lần commit áp dụng vào cả 2 branch A và B
+Vấn đề 2: ta muốn lấy n commit bất kỳ từ branch A và áp dụng cho branch B. Tức mọi phần code thay đổi ở n commit trên branch A sẽ áp dụng cho B
+=> git merge 2 branch bằng cách kết hợp các commit lại và sinh ra commit merge ở cuối. Còn git rebase nhánh B khi đang ở nhánh A sẽ thay đổi base của nhánh A thành base nhánh B và thêm các commit còn lại của A vào cuối. Cả 2 cái đều k giải quyết được mà phải dùng git cherry-pick
+
+-> git cherry-pick --continue
+git cherry-pick --quit
+git cherry-pick --abort
+
+VD1 lấy commit trên cùng từ 1 branch bỏ vào master:
+git checkout master
+git cherry-pick <nhánh>~1
+Hoặc chỉ định hash commit: git cherry-pick <hash commit> => vì hash commit luôn là duy nhất nên k cần xđ branch nào
+
+VD2 lấy n commits từ 1 brach bỏ vào master
+- Nếu muốn thêm 1 vài commit không liên tục
+git cherry-pick commit_id1 commit_id3
+
+- Nếu muốn thêm 1 loạt commit lần lượt cạnh nhau
+git cherry-pick commit_id1...commit_id5
+Với code trên, thì commit_id1 sẽ ko được thêm vào. Để đưa commit được tính vào trong branch muốn thêm thì:
+git cherry-pick commit_id1^..commit_id5
+
+VD3 apply 1 commit A cho cả 2 branch-X và branch-Y
+# Đang ở branch-X, thực hiện commit để tạo ra commit A
+git add -A
+git commit -m " finish commit A"
+# Checkout sang branch Y và dùng cherry-pick
+git checkout branch-Y
+git cherry-pick branch-X => tự dùng commit trên cùng
+=> Cherry pick cũng có conflict, phải resolve, add r commit lại
+
+
+
+# git reflog => biện pháp cuối cùng
+git reflog lưu lại lịch sử thao tác trên git như commit, xóa branch, reset. Ta có thể undo các hành động, or thực hiện lại các hành động thoải mái
+
+git reflog => xem lịch sử thao tác git trên mọi nhánh
+git reflog a => xem lịch sử thao tác git chỉ trên nhánh a
+
+-> VD Khôi phục branch x đã bị xóa mà chưa push:
+git reflog => hiển thị lịch sử thao tác git, ta tìm vị trí HEAD@{n} là thao tác mới nhất ở nhánh x muốn được khôi phục về. 
+git checkout -b x 'HEAD@{n}' => tạo lại nhánh x có trạng thái y như HEAD@{n}, ta có thể đặt tên nhánh là gì cx được.
+
+-> VD Khôi phục code khi lỡ dùng git reset --hard:
+1) Nó không khôi phục được khi ta chưa commit code
+
+2) Đã commit code nhưng chưa push, chưa commit thêm gì, lỡ gọi git reset --hard HEAD~1 (xóa commit mới nhất) thay vì git reset --soft HEAD~1 (để sửa commit mới nhất), cần khôi phục commit đã xóa
+git reflog => thấy những thao tác cũ
+Ta tìm hành động cuối cùng trước khi xóa, thg ở đây là HEAD@{1} thì dùng: git reset --hard HEAD@{1} là xong
+
+3) Xóa commit cũ, thêm commit mới, lại muốn khôi phục commit cũ kia:
+git reflog => tìm id của hành động mà dùng để thêm commit cũ vào, 
+git cherry-pick <id hành động> => để thêm lại hành động đó vào nhánh mới nhất
+
+=> Tương tự có thể tùy biến. VD ta muốn rebase từ develop vào feature nhưng lại rebase nhầm master vào feature. 
+Ta cần hoàn tác thì lại git reflog để tìm id của hành động gần nhất trước khi rebase -> git reset --hard HEAD@{n} với HEAD@{n} là hành động tìm được
+
+
+
+# git subtree
+Tính năng trong git quản lý các repo con bên trong repo chính mà k dùng submodules, k cần clone về. Repo con và cha độc lập.
+
+Thêm 1 repo con vào dự án: git subtree add --prefix=path/to/subtree <repository-url> <branch>
+
+Nếu repo con đổi muốn update cha phải pull: git subtree pull --prefix=path/to/subtree <repository-url> <branch>
+Or gọn hơn: git subtree pull
+
+-> Tạo 1 subtree từ 1 thư mục trong nhánh hiện tại, subtree này có repo là repo hiện tại luôn nhưng ở 1 nhánh khác
+VD thư mục dist sang nhánh mới là gh-pages: git subtree push --prefix dist origin gh-pages
+=> Ứng dụng tạo ra thư mục build ở 1 nhánh riêng dùng cho hosting
+
+
+
+# Commit conventions
+Cú pháp phải tuân thủ cả dấu cách dòng: 
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+
+=> <type> có thể là feat/fix/build/cli/chore/docs/styles/refactor/test/perf
+[optional scope] là thứ mô tả section trong codebase bằng 1 danh từ như: lang, git, html, api, parser tùy ý
+[optional footer(s)] có thể là BREAKING CHANGE sẽ mô tả 1 sự thay đổi lớn. Có thể dùng dấu ! sau type/scope cũng mang ý nghĩa tương tự. Còn bth, footer là những thứ mô tả bth.
+
+- VD multiline body:
+fix: prevent racing of requests
+
+Introduce a request id and a reference to latest request. Dismiss incoming responses other than from latest request.
+Remove timeouts which were used to mitigate the racing issue but are obsolete now.
+
+Reviewed-by: Z
+Refs: #123
+
+=> Có nơi, nó dùng scope đằng trước nhìn dễ hơn. VD: [GIT]feat: add data
+
+

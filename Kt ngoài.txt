@@ -1,0 +1,23 @@
+# Version control
+Central version control: SVN, TFS
+Distributed version control: Git, Mercurial
+
+Git phân tán vì mỗi client sẽ lấy tất cả file từ db để có toàn bộ project rồi chỉ cần thao tác ở local. Còn hệ thống tập trung là mọi người request các file cần dùng từ server, khi server sập là toang. 
+Git là mô hình hệ thống, còn Github / Gitlab chỉ là công ty cung cấp dịch vụ máy chủ repository cho mn dùng theo cái hệ thống git kia.
+
+Khi tải về git thì sẽ có đc 3 thành phần: Git GUI, Git Bash, Git CMD
+
+-> Phân biệt: MSDos là OS đời cũ là hđh dùng commandline.
+PowerShell cũng tương tự của widow là cmd
+Terminal là của Linux hay chính là Git Bash.
+Terminal trên VSC cũng là Git Bash nhưng lệnh nó hơi khác. Khi cài nodejs thì terminal của VSC có thể dùng cho các package npm, yarn.
+
+Để paste từ bên ngoài vào Bash => ấn insert
+Chuyển chế độ khỏi INSERT Mode với ESC, :q để thoát, :q! để thoát k lưu
+
+-> Còn có smartgit, tortoise git, git lens extension, github desktop
+
+-> Git có 3 trạng thái: commited là dữ liệu đã lưu an toàn trong database(local); modified là dữ liệu đổi nhưng chưa lưu trong database(local); staged là các files đã modified và chuẩn bị được commited; untracked chỉ các file tạo ra nhưng chưa add commit or các file đã tồn tại xong lại xóa đi
+Điều này chia git làm 3 area: thư mục làm vc (working tree) chứa bản sao phiên bản cụ thể của dự án; Thư mục .git là nơi lưu database các file metadata(); Khu vực sắp xếp (staging) là 1 file nằm trong thư mục .git chứa thông tin sẽ commit
+
+
