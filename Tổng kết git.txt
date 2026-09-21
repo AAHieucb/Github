@@ -142,6 +142,51 @@ git config --global merge.ff false => set vĩnh viễn dùng --no-ff tự độn
 
 
 
+# git reflog => biện pháp cuối cùng
+Reflog lưu lại lịch sử thao tác trên git như commit, xóa branch, reset nên có thể undo or thực hiện lại các hành động thoải mái
+git reflog => xem lịch sử thao tác git trên mọi nhánh
+git reflog a => xem lịch sử thao tác git chỉ trên nhánh a
+
+VD khôi phục branch x đã bị xóa mà chưa push:
+git reflog => hiển thị lịch sử thao tác git, tìm vị trí HEAD@{n} là thao tác mới nhất ở nhánh x muốn được khôi phục về. 
+git checkout -b x 'HEAD@{n}' => tạo lại nhánh x có trạng thái y như HEAD@{n}, có thể đặt tên nhánh là gì cx được.
+
+VD khôi phục code khi lỡ dùng git reset --hard:
+- Code phải commit, có thể chưa push, chưa commit thêm gì thì mới được. Nếu code chưa commit mà xóa sẽ k đươc.
+- Lỡ gọi git reset --hard HEAD~1 (xóa commit mới nhất) thay vì git reset --soft HEAD~1 (để sửa commit mới nhất), cần khôi phục commit đã xóa
+git reflog => thấy những thao tác cũ
+Tìm hành động cuối cùng trước khi xóa, thg ở đây là HEAD@{1} thì dùng git reset --hard HEAD@{1} là xong
+
+VD xóa commit cũ, thêm commit mới, lại muốn khôi phục commit cũ kia:
+git reflog => tìm id của hành động mà dùng để thêm commit cũ vào, 
+git cherry-pick <id hành động> => để thêm lại hành động đó vào nhánh mới nhất
+
+VD tùy biến, muốn rebase từ develop vào feature nhưng lại rebase nhầm master vào feature. 
+Cần hoàn tác thì lại git reflog để tìm id của hành động gần nhất trước khi rebase -> git reset --hard HEAD@{n} với HEAD@{n} là hành động tìm được
+
+
+
+# Commit conventions
+- Cú pháp phải tuân thủ cả dấu cách dòng: 
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+với:
+<type> có thể là feat/fix/build/cli/chore/docs/styles/refactor/test/perf
+[optional scope] mô tả section trong codebase bằng 1 danh từ như: lang, git, html, api, parser tùy ý
+[optional footer(s)] có thể là BREAKING CHANGE sẽ mô tả 1 sự thay đổi lớn. Có thể dùng dấu ! sau type/scope cũng mang ý nghĩa tương tự
+
+- Có thể dùng multiline body:
+fix: prevent racing of requests
+
+Introduce a request id and a reference to latest request. Dismiss incoming responses other than from latest request.
+Remove timeouts which were used to mitigate the racing issue but are obsolete now.
+
+Reviewed-by: Z
+Refs: #123
+
 
 
 
@@ -180,7 +225,7 @@ SSH: trao đổi thông qua 1 SSH key, khi dùng nó sẽ lưu SSH key vào bả
 
 
 
-
+//!!!!!!!!!!
 # Hiểu git merge và git rebase
 git merge <tên branch1> -m "comment" => merge cũng là 1 lệnh commit, thêm branch1 vào branch hiện tại
 git merge so sánh commit cơ sở chung cuối cùng của 2 nhánh và 2 commit cuối của 2 nhánh. Nếu có xung đột phải tự xử lý và git add commit lại.
@@ -276,30 +321,6 @@ git cherry-pick branch-X => tự dùng commit trên cùng
 
 
 
-# git reflog => biện pháp cuối cùng
-git reflog lưu lại lịch sử thao tác trên git như commit, xóa branch, reset. Ta có thể undo các hành động, or thực hiện lại các hành động thoải mái
-
-git reflog => xem lịch sử thao tác git trên mọi nhánh
-git reflog a => xem lịch sử thao tác git chỉ trên nhánh a
-
--> VD Khôi phục branch x đã bị xóa mà chưa push:
-git reflog => hiển thị lịch sử thao tác git, ta tìm vị trí HEAD@{n} là thao tác mới nhất ở nhánh x muốn được khôi phục về. 
-git checkout -b x 'HEAD@{n}' => tạo lại nhánh x có trạng thái y như HEAD@{n}, ta có thể đặt tên nhánh là gì cx được.
-
--> VD Khôi phục code khi lỡ dùng git reset --hard:
-1) Nó không khôi phục được khi ta chưa commit code
-
-2) Đã commit code nhưng chưa push, chưa commit thêm gì, lỡ gọi git reset --hard HEAD~1 (xóa commit mới nhất) thay vì git reset --soft HEAD~1 (để sửa commit mới nhất), cần khôi phục commit đã xóa
-git reflog => thấy những thao tác cũ
-Ta tìm hành động cuối cùng trước khi xóa, thg ở đây là HEAD@{1} thì dùng: git reset --hard HEAD@{1} là xong
-
-3) Xóa commit cũ, thêm commit mới, lại muốn khôi phục commit cũ kia:
-git reflog => tìm id của hành động mà dùng để thêm commit cũ vào, 
-git cherry-pick <id hành động> => để thêm lại hành động đó vào nhánh mới nhất
-
-=> Tương tự có thể tùy biến. VD ta muốn rebase từ develop vào feature nhưng lại rebase nhầm master vào feature. 
-Ta cần hoàn tác thì lại git reflog để tìm id của hành động gần nhất trước khi rebase -> git reset --hard HEAD@{n} với HEAD@{n} là hành động tìm được
-
 
 
 # git subtree
@@ -316,28 +337,7 @@ VD thư mục dist sang nhánh mới là gh-pages: git subtree push --prefix dis
 
 
 
-# Commit conventions
-Cú pháp phải tuân thủ cả dấu cách dòng: 
-<type>[optional scope]: <description>
 
-[optional body]
-
-[optional footer(s)]
-
-=> <type> có thể là feat/fix/build/cli/chore/docs/styles/refactor/test/perf
-[optional scope] là thứ mô tả section trong codebase bằng 1 danh từ như: lang, git, html, api, parser tùy ý
-[optional footer(s)] có thể là BREAKING CHANGE sẽ mô tả 1 sự thay đổi lớn. Có thể dùng dấu ! sau type/scope cũng mang ý nghĩa tương tự. Còn bth, footer là những thứ mô tả bth.
-
-- VD multiline body:
-fix: prevent racing of requests
-
-Introduce a request id and a reference to latest request. Dismiss incoming responses other than from latest request.
-Remove timeouts which were used to mitigate the racing issue but are obsolete now.
-
-Reviewed-by: Z
-Refs: #123
-
-=> Có nơi, nó dùng scope đằng trước nhìn dễ hơn. VD: [GIT]feat: add data
 
 
 
