@@ -223,33 +223,32 @@ SSH: trao đổi thông qua 1 SSH key, khi dùng nó sẽ lưu SSH key vào bả
 
 
 
+# git merge và git rebase
+-> Nên tạo MR thay vì dùng git merge
+git merge branchx -m "comment" => merge cũng là 1 lệnh commit, thêm branchx vào branch hiện tại
+git merge so sánh commit cơ sở chung cuối cùng của 2 nhánh và 2 commit cuối của 2 nhánh để tìm conflict
 
+-> git rebase: base commit là các commits cơ sở của 1 nhánh. Khi ở nhánh A mà git rebase <nhánh B> thì mọi commit của nhánh B sẽ thành commit cơ sở của nhánh A. Các commit theo sau commit cơ sở của nhánh A sẽ thực hiện ngay sau đó, nếu các commit đó có conflict với các commit cơ sở mới thêm, thì phải xử lý conflict. git rebase --continue để chỉnh sửa các commit sau commit cơ sở của A thành 1 commit mới như những gì ta vừa chọn, có thể đổi message hay đổi tên sau đó nó sẽ tiếp tục như v đến khi hết các commit của A thì rebase xong
 
-//!!!!!!!!!!
-# Hiểu git merge và git rebase
-git merge <tên branch1> -m "comment" => merge cũng là 1 lệnh commit, thêm branch1 vào branch hiện tại
-git merge so sánh commit cơ sở chung cuối cùng của 2 nhánh và 2 commit cuối của 2 nhánh. Nếu có xung đột phải tự xử lý và git add commit lại.
-
-git rebase: base commit là các commit cơ sở của 1 nhánh. Khi đang ở nhánh A mà ta git rebase <nhánh B> thì mọi commit của nhánh B sẽ thành commit cơ sở của nhánh A. Các commit theo sau commit cơ sở của nhánh A sẽ thực hiện ngay sau đó, nếu các commit đó có conflict với các commit cơ sở mới thêm, ta phải chọn để xử lý conflict. git rebase --continue để chỉnh sửa các commit sau commit cơ sở của A thành 1 commit mới như những gì ta vừa chọn, có thể đổi message hay đổi tên sau đó nó sẽ tiếp tục như v đến khi hết các commit của A thì rebase xong
-
-rebase là biến các commit nào thành base r sửa từng commit của nhánh này theo base. Dùng khi muốn chắc chắn tất cả commit của branch nào, sau đó các branch phụ ta add thêm các thứ vào branch chính đó.
-merge là ta so sánh 2 commit cuối cùng của 2 nhánh và tiến hành chọn cái nào khác biệt thôi.
-
--> VD merge:
-Alpha: C1 -> C2 -> C3   ->   C4
+VD merge:
+Alpha: C1 -> C2 -> C3   ->    C4
 Beta:  C1 -> C2 ->   C5 -> C6
 => git checkout Alpha -> git merge Beta -> Nhánh Alpha biến thành: C1 -> C2 -> C3 -> C5 -> C6 -> C4 -> Merge Commit (resolve conflict)
 VD rebase:
 Alpha: C1 -> C2 -> C3   ->   C4
 Beta:  C1 -> C2 ->   C5 -> C6
 => git checkout Alpha -> git rebase Beta -> Nhánh Alpha biến thành: C1 -> C2 -> C5 -> C6 -> C3' -> C4'
-C3' và C4' là 2 commit C3 C4 của Alpha bị sửa đổi lại cho phù hợp với base commit C1->C2->C5->C6 
+C3' và C4' là 2 commit C3 C4 của Alpha bị sửa đổi lại cho phù hợp với base commit C1->C2->C5->C6, tức nhanh beta thành base của alpha
 
-VD rebase dùng kiểu 1 branch fix lỗi, 1 branch đang làm việc. Sau khi kết thúc ta rebase branch đang làm việc thành base chính, sau đó branch fix lỗi ta chỉ add thêm cái gì vào branch chính thì ok
-VD xử lý nhánh quá tuyệt vời, chơi cả xung đột nhánh khi gộp luôn: https://xuanthulab.net/lam-viec-voi-nhanh-branch-tao-nhanh-gop-nhanh-trong-git.html
+merge so sánh 2 commit cuối cùng của 2 nhánh, lấy cả 2 và resolve conflict
+rebase biến các commit nào thành base r sửa từng commit của nhánh hiện tại theo base.
 
-=> Đa số TH dùng merge nhưng khi phức tạp cần phải đổi cả commit base thì nên dùng rebase.
-Tình huống: 1 công ty làm 1 sản phẩm chia 2 nhánh. 1 nhánh do 1 team phát triển sản phẩm. 1 nhánh do 1 team chuyên fix bug. Khi bàn giao sản phẩm phải gộp lại. Khi đó ta dùng merge thì sẽ rất loạn nếu dự án lớn. Nhưng dùng base thì ta sẽ fix từng commit 1 theo trình tự thời gian thì ta sẽ so sánh được file nào được xử lý bug ntn và đổi commit tốt hơn:
+
+
+
+
+
+Usecase: 1 công ty làm 1 sản phẩm chia 2 nhánh. 1 nhánh do 1 team phát triển sản phẩm. 1 nhánh do 1 team chuyên fix bug. Khi bàn giao sản phẩm phải gộp lại. Khi đó ta dùng merge thì sẽ rất loạn nếu dự án lớn. Nhưng dùng base thì ta sẽ fix từng commit 1 theo trình tự thời gian thì ta sẽ so sánh được file nào được xử lý bug ntn và đổi commit tốt hơn:
 git checkout develop -> git merge bugfix -> or ngược lại đều đc
 git checkout bugfix -> git rebase develop -> đúng thứ tự này vì develop phải là base r sau đó mới fix bug đc chứ
 
@@ -274,6 +273,10 @@ Hàm rebase set lại tập file ở base và xử lý cái file hiện tại so
 
 
 
+
+
+
+//!!!!!!!!!!
 # Git merge
 Có thể thêm 1 repos khác vào repos hiện tại, cứ clone trực tiếp về. Nhưng push lên sẽ k thấy, phải dùng submodule.
 Thêm 1 repos vào repos nhưng dưới dạng submodule: git submodule add <url> <tên submodule> => submodule giúp cho 1 module có thể dùng nhiều nơi
