@@ -207,6 +207,7 @@ Refs: #123
 
 
 
+//!!!!!!!!!!
 # git merge và git rebase
 -> Nên tạo MR thay vì dùng git merge
 git merge branchx -m "comment" => merge cũng là 1 lệnh commit, thêm branchx vào branch hiện tại
@@ -271,7 +272,6 @@ Hàm rebase set lại tập file ở base và xử lý cái file hiện tại so
 
 
 
-//!!!!!!!!!!
 # Git merge
 Có thể thêm 1 repos khác vào repos hiện tại, cứ clone trực tiếp về. Nhưng push lên sẽ k thấy, phải dùng submodule.
 Thêm 1 repos vào repos nhưng dưới dạng submodule: git submodule add <url> <tên submodule> => submodule giúp cho 1 module có thể dùng nhiều nơi
