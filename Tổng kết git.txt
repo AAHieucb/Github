@@ -19,6 +19,22 @@ Dùng * để tìm các file cùng định dạng. VD: *.xml chọn tất cả c
 Dùng ** khi thư mục k định rõ tên. VD **/foo sẽ bỏ qua mọi file or thư mục có tên foo mọi nơi trong project.
 VD config/*.xml bỏ qua file config/abc.xml nhưng k có hiệu lực với config/sub/abc.xml
 
+-> git init
+
+git add *.c => tất cả file đuôi c được giám sát
+git add -u => tự động staged các file đã giám sát từ trước thì add tiếp, bỏ qua các file chưa đc từng được add 
+
+git status hiển thị sự khác biệt giữa vùng staged và commited.
+git status -s/--short  thì: ' ' unmodified; M modified; A/? added; D deleted; R renamed; C copied; U updated but unmerged; 
+
+git commit lưu thông tin vùng staging vào db, và con trỏ HEAD tự động dịch chuyển đến commit mới nhất. 
+git commit -a -m "Ghi chú về commit" => -a chính là git add . kẹp vào => k nên dùng
+git commit --amend -m "Message mới" 
+
+-> git clone <git path> <des> => des mặc định là thư mục hiện tại
+git clone -b <branch> <url> => chỉ clone về 1 nhánh
+HTTPS phải nhập tk, mk (connect to git) để push. Còn SSH trao đổi thông qua 1 key, khi dùng nó sẽ lưu SSH key vào bảng và tự gửi kèm mỗi lần thao tác để xác nhận
+
 
 
 # Git config
@@ -26,7 +42,7 @@ git config --list # Show mọi config
 git config --global user.name "Tên của Bạn" # Thiết lập tên trên hệ thống git
 git config --global user.email emailcuaban@domain.com # Thiết lập email
 Dùng --global nếu muốn config có hiệu lực với user hiện tại của hệ thống, --system nếu muốn có hiệu lực với mọi user, k có gì là chỉnh ở chính cấu hình thư mục .git chỉ có tác dụng cho repo hiện tại
-Để chỉnh sửa các config lỗi: git config --global --edit xong vào trong xóa các config gây lỗi và save lại.
+Để chỉnh sửa các config lỗi: git config --global --edit xong vào trong xóa các config gây lỗi và save lại
 
 
 
@@ -84,7 +100,7 @@ git rm --cached <tên file> => xoá file và đưa việc xoá vào staged luôn
 
 
 # git checkout (thay thế git switch)
-git checkout <hash> <link file> => biến nội dung file nào về 1 commit cũ, k có hash thì tự phục hồi về commit mới nhất
+git checkout <hash> <link file> => biến nội dung file nào về 1 commit cũ, k có hash thì tự phục hồi về commit mới nhất. Dùng git checkout <mã hash của commit> . sẽ ốp trong phạmh vi thư mục hiện tại
 git checkout -- *.html => phục hồi tất cả file có đuôi html
 git checkout -- . => phục hồi tất cả, y hệt git restore . 
 git checkout <hash> => trở về 1 commit có mã hash nào đó. Head sẽ chuyển đến commit này ở chế độ detached, là 1 nhánh tạm thời được tạo ra. Nếu k lưu vào 1 nhánh khác thì nhánh tạm thời sẽ mất khi chuyển nhánh
@@ -97,6 +113,7 @@ git branch -m old_branch new_branch -> đổi tên của old branch thành tên 
 git branch -a => hiển thị các nhánh có trên remote, nên dùng git fetch trước để fetch nhánh remote về local đã. Nhánh ở local dùng trực tiếp tên, ở remote chưa có ở local thì phải dùng origin/<tên nhánh ở remote>
 git branch -v => liệt kê mọi nhánh và commit cuối
 git branch --merged/--no-merged => liệt kê các nhánh đc/k đc merge với nhánh hiện tại
+git branch --remote => xem tất cả các nhánh của repo remote, các branch của remote luôn có name dạng origin/<tên branch>
 
 
 
@@ -190,39 +207,6 @@ Refs: #123
 
 
 
-
-//!!!!!!!!!!
-# init add commit status clone
--> git init: nếu k muốn push code lên mà chỉ muốn mình ta quản lý phiên bản thì tạo mỗi cái local repos này thôi cũng ok.
-git init --bare => tạo 1 repo git chỉ có chức năng lưu trữ, k có thư mục làm việc. Nó thg dùng để lưu trữ như 1 remote repo như server, từ đó local clone về => sau khi dùng git init --bare thì như 1 remote repos r, ta có thể tạo 1 local repos remote or clone đến nó đều đc
-
--> git add <file/folder> sẽ đưa file, thư mục vào staging. Nó snapshot toàn bộ file/thư mục mới. Vc lưu lại snapshot của thư mục đang làm việc gọi là đánh chỉ mục index.
-git add *.c => tất cả file đuôi c được giám sát
-git add -u => tự động staged các file đã giám sát từ trước thì add tiếp, bỏ qua các file chưa đc từng được add, vd file mới tạo 
-
--> git status hiển thị sự khác biệt giữa vùng staged và commited.
-git status -s/--short  thì: ' ' unmodified; M modified; A/? added; D deleted; R renamed; C copied; U updated but unmerged; 
-
--> git commit lưu thông tin vùng staging vào db, và con trỏ HEAD tự động dịch chuyển đến commit mới nhất. 
-git commit -a -m "Ghi chú về commit" => -a chính là git add . kẹp vào => k nên dùng
-git commit --amend -m "Message mới" 
-
-Nếu muốn mở project ở lần commit đó để xem: git checkout <mã hash của commit> => lúc này git cmd đang thao tác sẽ ở trạng thái HEAD detached và đang ở 1 branch mới k thể thao tác.
-Nếu ta muốn dùng 1 commit cũ của dự án hiện tại vào dự án hiện tại: git checkout <mã hash của commit> . => chú ý thêm dấu chấm, ta dùng commit và push lên thì sẽ khiến dự án hiện tại chỉnh sửa thành lúc nó ở commit cũ, điều đó thực hiện trên 1 commit mới
-
--> Resolve conflict: git add . => git commit -m "" => lỗi => git pull => resolve conflict => git add lại, commit, push
-=> Khi làm nhiều người, luôn pull trước để xác nhận thay đổi, sau đó mới push vào
-
--> git clone <git path> <des> => des mặc định là thư mục hiện tại, git path có thể là https url, ssh, đường dẫn local drive => clone chỉ lấy nhánh chính đang hoạt động
-git branch --remote => xem tất cả các nhánh của repos remote. Chú ý các branch của remote luôn có name dạng origin/<tên branch>
-git clone -b <branch> <url> => chỉ clone về 1 nhánh
-Nếu k dùng git clone mà git init rồi git remote add origin rồi pull từ dự án về cũng được. Lần pull đầu tiên: git branch --set-upstream-to=origin/<branch> master
-
-HTTPS: đôi lúc phải nhập tk, mk (connect to git) để push sau khi clone
-SSH: trao đổi thông qua 1 SSH key, khi dùng nó sẽ lưu SSH key vào bảng và tự gửi kèm mỗi lần thao tác để xác nhận
-
-
-
 # git merge và git rebase
 -> Nên tạo MR thay vì dùng git merge
 git merge branchx -m "comment" => merge cũng là 1 lệnh commit, thêm branchx vào branch hiện tại
@@ -270,6 +254,17 @@ Chú ý khi ta thao tác trên 1 nhánh và commit 2 lần -> sau đó merge v�
 Cách xóa 1 commit trên local: git rebase -i HEAD~N -> i -> commit mới nhất ở dưới cùng, muốn xóa commit nào thì xóa dòng của commit đó. Nếu k có conflict thì commit tự được xóa thành công. Nếu có conflict -> chọn -> git add . -> git rebase --continue -> s -> đổi message nếu thích -> :wq
 Hàm rebase set lại tập file ở base và xử lý cái file hiện tại so với base. Tức git rebase -i HEAD~2 sẽ cho base bỏ ra 2 commit cuối và ta thao tác gì kệ ta theo các option-> sau đó sẽ nối lại và trong quá trình nối mà khác với thành phần base cuối thì phải resolve.
 Để xóa commit ở remote: đồng bộ remote và local -> xóa commit đó ở local -> git push origin +master => dấu + trước tên nhánh sẽ ép hàm push thực hiện. Ta cx có thể xóa trên remote bằng lệnh git reset --soft/--hard HEAD~N r sau đó gọi git push origin +<nhánh cx đc>
+
+
+
+-> Resolve conflict: git add . => git commit -m "" => lỗi => git pull => resolve conflict => git add lại, commit, push
+=> Khi làm nhiều người, luôn pull trước để xác nhận thay đổi, sau đó mới push vào
+
+
+
+
+
+
 
 
 
